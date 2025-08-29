@@ -10,7 +10,7 @@ import Hero from '@/components/Hero';
 import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
 import AuthModal from '@/components/AuthModal';
-import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import heroImage from '@/assets/hero-image.jpg';
@@ -46,7 +46,7 @@ const Index = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoaded } = useUser();
   const { toast } = useToast();
 
   // Load sample products
@@ -229,7 +229,7 @@ const Index = () => {
 
   const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  if (loading || authLoading) {
+  if (loading || !isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -241,11 +241,10 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <Header
-        cartItemsCount={cartItemsCount}
-        onCartOpen={() => setCartOpen(true)}
+        searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        user={user}
-        onAuthOpen={() => setAuthOpen(true)}
+        cartItemCount={cartItemsCount}
+        onCartClick={() => setCartOpen(true)}
       />
 
       {/* Hero Section */}
