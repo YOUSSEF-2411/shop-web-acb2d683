@@ -15,14 +15,14 @@ const Hero: React.FC = () => {
           {/* Content */}
           <div className="text-center lg:text-left">
             <h1 className="text-5xl lg:text-6xl font-bold mb-6 text-primary-foreground leading-tight">
-              Craft Your
+              Unleash your creativity
               <span className="block bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
-                Perfect Style
+                With artificial intelligence tools
               </span>
             </h1>
             
             <p className="text-xl text-primary-foreground/90 mb-8 max-w-lg mx-auto lg:mx-0">
-              Discover unique handcrafted products that tell a story. From artisan jewelry to home décor, find pieces that speak to your soul.
+              With artificial intelligence tools from Tech Verse You can do everything and show your creativity without limits and exclusive subscriptions.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -43,8 +43,8 @@ const Hero: React.FC = () => {
                 <div className="text-primary-foreground/80 text-sm">Happy Customers</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary-foreground">5K+</div>
-                <div className="text-primary-foreground/80 text-sm">Products</div>
+                <div className="text-2xl font-bold text-primary-foreground">1K+</div>
+                <div className="text-primary-foreground/80 text-sm">Subscriptions</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary-foreground">99%</div>
@@ -62,8 +62,8 @@ const Hero: React.FC = () => {
                     <ShoppingBag className="h-6 w-6 text-accent-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-primary-foreground">Free Shipping</h3>
-                    <p className="text-primary-foreground/80 text-sm">On orders over $50</p>
+                    <h3 className="font-semibold text-primary-foreground">Easy Shpping</h3>
+                    <p className="text-primary-foreground/80 text-sm">Easy and secure subscription</p>
                   </div>
                 </div>
               </CardContent>
@@ -76,8 +76,8 @@ const Hero: React.FC = () => {
                     <Zap className="h-6 w-6 text-warning-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-primary-foreground">Fast Delivery</h3>
-                    <p className="text-primary-foreground/80 text-sm">2-3 business days</p>
+                    <h3 className="font-semibold text-primary-foreground">Technical support</h3>
+                    <p className="text-primary-foreground/80 text-sm">1-2 business days</p>
                   </div>
                 </div>
               </CardContent>
@@ -91,7 +91,7 @@ const Hero: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-primary-foreground">Secure Payment</h3>
-                    <p className="text-primary-foreground/80 text-sm">256-bit SSL encryption</p>
+                    <p className="text-primary-foreground/80 text-sm">SSL encryption</p>
                   </div>
                 </div>
               </CardContent>
