@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Logo */}
           <div className="flex-shrink-0">
             <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              VanillaCraft
+              Tech Verse
             </h1>
           </div>
 
