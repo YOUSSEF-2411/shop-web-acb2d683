@@ -129,15 +129,19 @@ const AdminPage = () => {
     }
 
     try {
-      const productData = {
-        ...newProduct,
-        rating: 4.5,
-        rating_count: 0
-      };
-
       const { data, error } = await supabase
         .from('products')
-        .insert(productData)
+        .insert([{
+          id: crypto.randomUUID(),
+          title: newProduct.title,
+          description: newProduct.description,
+          price: newProduct.price,
+          image: newProduct.image,
+          category: newProduct.category,
+          stock: newProduct.stock,
+          rating: 4.5,
+          rating_count: 0
+        }])
         .select()
         .single();
 

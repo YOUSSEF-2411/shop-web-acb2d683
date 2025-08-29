@@ -49,80 +49,37 @@ const Index = () => {
   const { user, isLoaded } = useUser();
   const { toast } = useToast();
 
-  // Load sample products
+  // Load products from Supabase
   useEffect(() => {
-    const sampleProducts: Product[] = [
-      {
-        id: '1',
-        title: 'Handcrafted Ceramic Vase',
-        description: 'Beautiful hand-thrown ceramic vase with unique glaze patterns. Perfect for fresh flowers or as a standalone decorative piece.',
-        price: 89.99,
-        image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop',
-        category: 'Home Décor',
-        rating: 4.8,
-        rating_count: 124,
-        stock: 15
-      },
-      {
-        id: '2',
-        title: 'Sterling Silver Pendant Necklace',
-        description: 'Elegant sterling silver pendant with natural gemstone. Handcrafted by local artisans with attention to detail.',
-        price: 156.00,
-        image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop',
-        category: 'Jewelry',
-        rating: 4.9,
-        rating_count: 89,
-        stock: 8
-      },
-      {
-        id: '3',
-        title: 'Artisan Leather Journal',
-        description: 'Premium leather-bound journal with handmade paper. Perfect for writers, artists, or anyone who loves quality stationery.',
-        price: 45.50,
-        image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop',
-        category: 'Stationery',
-        rating: 4.7,
-        rating_count: 201,
-        stock: 23
-      },
-      {
-        id: '4',
-        title: 'Wooden Cutting Board Set',
-        description: 'Set of 3 handcrafted wooden cutting boards made from sustainable bamboo. Each piece is unique with beautiful grain patterns.',
-        price: 67.99,
-        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop',
-        category: 'Kitchen',
-        rating: 4.6,
-        rating_count: 156,
-        stock: 12
-      },
-      {
-        id: '5',
-        title: 'Hand-woven Wool Scarf',
-        description: 'Luxurious hand-woven scarf made from premium merino wool. Available in multiple colors with intricate patterns.',
-        price: 78.00,
-        image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&fit=crop',
-        category: 'Fashion',
-        rating: 4.8,
-        rating_count: 78,
-        stock: 19
-      },
-      {
-        id: '6',
-        title: 'Handmade Soap Collection',
-        description: 'Set of 4 natural handmade soaps with essential oils. Each bar is crafted with organic ingredients and natural fragrances.',
-        price: 32.99,
-        image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400&h=400&fit=crop',
-        category: 'Bath & Body',
-        rating: 4.5,
-        rating_count: 234,
-        stock: 45
-      }
-    ];
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-    setProducts(sampleProducts);
-    setFilteredProducts(sampleProducts);
-    setLoading(false);
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setProducts(data);
+          setFilteredProducts(data);
+        } else {
+          // No products in database yet, show empty state
+          setProducts([]);
+          setFilteredProducts([]);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        // Show empty state on error
+        setProducts([]);
+        setFilteredProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   // Filter and search products
@@ -383,11 +340,7 @@ const Index = () => {
         onCheckout={handleCheckout}
       />
 
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={authOpen}
-        onClose={() => setAuthOpen(false)}
-      />
+      {/* Auth Modal - No longer needed with Clerk */}
     </div>
   );
 };

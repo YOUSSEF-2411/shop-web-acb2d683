@@ -2,28 +2,25 @@ import React, { useState } from 'react';
 import { ShoppingCart, Search, User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
 interface HeaderProps {
-  cartItemsCount: number;
-  onCartOpen: () => void;
+  searchQuery: string;
   onSearchChange: (query: string) => void;
-  user?: any;
-  onAuthOpen: () => void;
+  cartItemCount: number;
+  onCartClick: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  cartItemsCount, 
-  onCartOpen, 
+  searchQuery,
   onSearchChange,
-  user,
-  onAuthOpen 
+  cartItemCount,
+  onCartClick
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
-    setSearchQuery(query);
     onSearchChange(query);
   };
 
@@ -63,30 +60,34 @@ const Header: React.FC<HeaderProps> = ({
           {/* Actions */}
           <div className="flex items-center space-x-4">
             {/* User Profile */}
-            {user ? (
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary-foreground" />
-                </div>
-                <span className="hidden sm:block text-sm font-medium">{user.email}</span>
-              </div>
-            ) : (
-              <Button variant="ghost" size="sm" onClick={onAuthOpen}>
-                Sign In
-              </Button>
-            )}
+            <SignedOut>
+              <SignInButton>
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton 
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8"
+                  }
+                }}
+              />
+            </SignedIn>
 
             {/* Cart */}
             <Button
               variant="ghost"
               size="icon"
-              onClick={onCartOpen}
+              onClick={onCartClick}
               className="relative"
             >
               <ShoppingCart className="h-5 w-5" />
-              {cartItemsCount > 0 && (
+              {cartItemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                  {cartItemsCount}
+                  {cartItemCount}
                 </span>
               )}
             </Button>
