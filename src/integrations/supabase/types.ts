@@ -82,6 +82,30 @@ export type Database = {
           },
         ]
       }
+      offers: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          image: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id: number
+          image?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          image?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string | null
@@ -208,6 +232,51 @@ export type Database = {
           link?: string | null
           source?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string | null
+          facebook_url: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: number
+          instagram_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          site_logo: string | null
+          site_name: string | null
+          updated_at: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          facebook_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: number
+          instagram_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          site_logo?: string | null
+          site_name?: string | null
+          updated_at?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          facebook_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: number
+          instagram_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          site_logo?: string | null
+          site_name?: string | null
+          updated_at?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }

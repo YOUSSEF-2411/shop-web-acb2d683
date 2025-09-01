@@ -30,9 +30,12 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              Tech Verse
-            </h1>
+            <div className="flex items-center space-x-2">
+              <img src="/src/assets/logo.png" alt="زهرة التوحيد" className="h-10 w-10" />
+              <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
+                زهرة التوحيد
+              </h1>
+            </div>
           </div>
 
           {/* Desktop Navigation */}

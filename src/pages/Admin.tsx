@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Lock, Plus, Edit, Trash2, Eye, EyeOff, Palette, Store, Package } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Trash2, Edit, Plus, Eye, EyeOff, Settings, Package, FileText, Lock, Store } from 'lucide-react';
+import AdminSettings from '@/components/AdminSettings';
 
 interface Product {
   id: string;
@@ -33,28 +34,27 @@ interface ThemeSettings {
 }
 
 const AdminPage = () => {
-  const { user } = useUser();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [themeSettings, setThemeSettings] = useState<ThemeSettings>({
-    id: 1,
-    primary_hex: '#2563EB',
-    accent_hex: '#22C55E',
-    hero_h1: 'اكتشف أفضل المنتجات',
-    hero_p: 'تسوق من مجموعة واسعة من المنتجات عالية الجودة بأفضل الأسعار'
-  });
-
   const [newProduct, setNewProduct] = useState({
     title: '',
     description: '',
-    price: 0,
+    price: '',
     image: '',
     category: '',
-    stock: 0
+    stock: ''
+  });
+  const [siteSettings, setSiteSettings] = useState<any>(null);
+  const [themeSettings, setThemeSettings] = useState<ThemeSettings>({
+    id: 1,
+    primary_hex: '#16a34a',
+    accent_hex: '#84cc16',
+    hero_h1: 'أطلق إبداعك مع أدوات الذكاء الاصطناعي',
+    hero_p: 'مع أدوات الذكاء الاصطناعي من زهرة التوحيد يمكنك فعل كل شيء وإظهار إبداعك بلا حدود واشتراكات حصرية'
   });
 
   useEffect(() => {
@@ -119,7 +119,7 @@ const AdminPage = () => {
   };
 
   const saveProduct = async () => {
-    if (!newProduct.title || !newProduct.description || newProduct.price <= 0) {
+    if (!newProduct.title || !newProduct.description || !newProduct.price || parseFloat(newProduct.price) <= 0) {
       toast({
         title: "بيانات ناقصة",
         description: "يرجى ملء جميع الحقول المطلوبة",
@@ -135,10 +135,10 @@ const AdminPage = () => {
           id: crypto.randomUUID(),
           title: newProduct.title,
           description: newProduct.description,
-          price: newProduct.price,
+          price: parseFloat(newProduct.price),
           image: newProduct.image,
           category: newProduct.category,
-          stock: newProduct.stock,
+          stock: parseInt(newProduct.stock) || 0,
           rating: 4.5,
           rating_count: 0
         }])
@@ -151,10 +151,10 @@ const AdminPage = () => {
       setNewProduct({
         title: '',
         description: '',
-        price: 0,
+        price: '',
         image: '',
         category: '',
-        stock: 0
+        stock: ''
       });
 
       toast({
@@ -312,18 +312,22 @@ const AdminPage = () => {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="products" className="flex items-center gap-2">
-              <Package className="w-4 h-4" />
+              <Package className="h-4 w-4" />
               المنتجات
             </TabsTrigger>
-            <TabsTrigger value="theme" className="flex items-center gap-2">
-              <Palette className="w-4 h-4" />
-              التصميم
-            </TabsTrigger>
             <TabsTrigger value="orders" className="flex items-center gap-2">
-              <Store className="w-4 h-4" />
+              <FileText className="h-4 w-4" />
               الطلبات
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              الإعدادات
+            </TabsTrigger>
+            <TabsTrigger value="theme" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              التصميم
             </TabsTrigger>
           </TabsList>
 
@@ -361,7 +365,7 @@ const AdminPage = () => {
                     id="price"
                     type="number"
                     value={newProduct.price}
-                    onChange={(e) => setNewProduct({...newProduct, price: parseFloat(e.target.value)})}
+                    onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
                     placeholder="0.00"
                   />
                 </div>
@@ -371,7 +375,7 @@ const AdminPage = () => {
                     id="stock"
                     type="number"
                     value={newProduct.stock}
-                    onChange={(e) => setNewProduct({...newProduct, stock: parseInt(e.target.value)})}
+                    onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
                     placeholder="0"
                   />
                 </div>
@@ -452,73 +456,33 @@ const AdminPage = () => {
             </Card>
           </TabsContent>
 
-          {/* Theme Tab */}
-          <TabsContent value="theme" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>إعدادات التصميم</CardTitle>
-                <CardDescription>
-                  تخصيص ألوان وشكل المتجر
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="primary_color">اللون الأساسي</Label>
-                    <Input
-                      id="primary_color"
-                      type="color"
-                      value={themeSettings.primary_hex}
-                      onChange={(e) => setThemeSettings({...themeSettings, primary_hex: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="accent_color">اللون المميز</Label>
-                    <Input
-                      id="accent_color"
-                      type="color"
-                      value={themeSettings.accent_hex}
-                      onChange={(e) => setThemeSettings({...themeSettings, accent_hex: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="hero_title">عنوان الصفحة الرئيسية</Label>
-                  <Input
-                    id="hero_title"
-                    value={themeSettings.hero_h1}
-                    onChange={(e) => setThemeSettings({...themeSettings, hero_h1: e.target.value})}
-                    placeholder="أدخل عنوان الصفحة الرئيسية"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="hero_subtitle">وصف الصفحة الرئيسية</Label>
-                  <Input
-                    id="hero_subtitle"
-                    value={themeSettings.hero_p}
-                    onChange={(e) => setThemeSettings({...themeSettings, hero_p: e.target.value})}
-                    placeholder="أدخل وصف الصفحة الرئيسية"
-                  />
-                </div>
-                <Button onClick={saveThemeSettings} className="w-full">
-                  حفظ الإعدادات
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Orders Tab */}
-          <TabsContent value="orders">
+          <TabsContent value="orders" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>إدارة الطلبات</CardTitle>
-                <CardDescription>
-                  عرض وإدارة طلبات العملاء
-                </CardDescription>
+                <CardDescription>عرض وإدارة طلبات العملاء</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8 text-muted-foreground">
                   لا توجد طلبات حالياً
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <AdminSettings onSettingsUpdate={setSiteSettings} />
+          </TabsContent>
+
+          <TabsContent value="theme">
+            <Card>
+              <CardHeader>
+                <CardTitle>معاينة التصميم</CardTitle>
+                <CardDescription>معاينة شكل الموقع بالإعدادات الحالية</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center text-muted-foreground">
+                  لمعاينة التصميم، قم بتحديث الإعدادات من تبويب "الإعدادات" ثم اذهب إلى الصفحة الرئيسية
                 </div>
               </CardContent>
             </Card>

@@ -13,13 +13,13 @@ All colors MUST be HSL.
     --foreground: 215 25% 15%;
 
     /* E-commerce Brand Identity */
-    --primary: 217 91% 60%;        /* #2563EB - Brand Blue */
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 91% 55%;
+    --primary: 142 76% 36%;        /* #16a34a - Brand Green */
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 142 76% 30%;
     
-    --accent: 142 71% 45%;         /* #22C55E - Success Green */
-    --accent-foreground: 0 0% 100%;
-    --accent-hover: 142 71% 40%;
+    --accent: 84 81% 44%;         /* #84cc16 - Success Green */
+    --accent-foreground: 0 0% 98%;
+    --accent-hover: 84 81% 40%;
 
     /* UI Colors */
     --card: 0 0% 100%;
@@ -36,17 +36,17 @@ All colors MUST be HSL.
     --ring: 217 91% 60%;
 
     /* E-commerce Specific */
-    --success: 142 71% 45%;
-    --success-foreground: 0 0% 100%;
+    --success: 122 39% 49%;
+    --success-foreground: 0 0% 98%;
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 0 0% 98%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 98%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
-    --gradient-accent: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 71% 55%));
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(142 71% 45%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(84 81% 44%), hsl(122 39% 49%));
+    --gradient-hero: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(84 81% 44%) 50%, hsl(122 39% 49%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(215 20% 98%) 100%);
 
     /* Shadows */
@@ -54,7 +54,7 @@ All colors MUST be HSL.
     --shadow-md: 0 4px 6px -1px hsl(215 25% 15% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(215 25% 15% / 0.1);
     --shadow-xl: 0 20px 25px -5px hsl(215 25% 15% / 0.1);
-    --shadow-glow: 0 0 20px hsl(217 91% 60% / 0.3);
+    --shadow-glow: 0 0 20px hsl(142 76% 36% / 0.3);
     --shadow-product: 0 8px 32px hsl(215 25% 15% / 0.08);
 
     /* Animations */
