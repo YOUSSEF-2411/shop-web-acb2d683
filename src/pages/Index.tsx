@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Grid, List, Star } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, Home, Package, Settings, HeadphonesIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import Header from '@/components/Header';
-import Hero from '@/components/Hero';
 import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
-import AuthModal from '@/components/AuthModal';
-import { useUser } from '@clerk/clerk-react';
+import OffersCarousel from '@/components/OffersCarousel';
+import BottomNavBar from '@/components/BottomNavBar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import heroImage from '@/assets/hero-image.jpg';
+import { useNavigate } from 'react-router-dom';
 
 interface Product {
   id: string;
@@ -38,49 +34,87 @@ interface CartItem {
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('featured');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<any>(null);
   
-  const { user, isLoaded } = useUser();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Load products from Supabase
+  // Load data from Supabase
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
+        // Fetch products, offers, and site settings in parallel
+        const [productsResult, offersResult, settingsResult] = await Promise.all([
+          supabase.from('products').select('*').order('created_at', { ascending: false }),
+          supabase.from('offers').select('*').order('created_at', { ascending: false }),
+          supabase.from('site_settings').select('*').eq('id', 1).maybeSingle()
+        ]);
 
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          setProducts(data);
-          setFilteredProducts(data);
-        } else {
-          // No products in database yet, show empty state
-          setProducts([]);
-          setFilteredProducts([]);
+        if (productsResult.data) {
+          setProducts(productsResult.data);
+          setFilteredProducts(productsResult.data);
         }
+        
+        if (offersResult.data) {
+          setOffers(offersResult.data);
+        }
+        
+        if (settingsResult.data) {
+          setSiteSettings(settingsResult.data);
+          // Apply theme colors
+          applyThemeColors(settingsResult.data);
+        }
+        
       } catch (error) {
-        console.error('Error fetching products:', error);
-        // Show empty state on error
-        setProducts([]);
-        setFilteredProducts([]);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, []);
+
+  const applyThemeColors = (settings: any) => {
+    if (!settings) return;
+    
+    const root = document.documentElement;
+    const hexToHsl = (hex: string) => {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+
+      return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+    };
+
+    if (settings.primary_color) {
+      root.style.setProperty('--primary', hexToHsl(settings.primary_color));
+    }
+    if (settings.secondary_color) {
+      root.style.setProperty('--accent', hexToHsl(settings.secondary_color));
+    }
+  };
 
   // Filter and search products
   useEffect(() => {
@@ -95,35 +129,8 @@ const Index = () => {
       );
     }
 
-    // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category === selectedCategory);
-    }
-
-    // Sorting
-    switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'newest':
-        filtered.sort((a, b) => b.id.localeCompare(a.id));
-        break;
-      default:
-        // Keep original order for 'featured'
-        break;
-    }
-
     setFilteredProducts(filtered);
-  }, [products, searchQuery, selectedCategory, sortBy]);
-
-  // Get unique categories
-  const categories = ['all', ...new Set(products.map(p => p.category))];
+  }, [products, searchQuery]);
 
   const addToCart = (product: Product) => {
     setCartItems(prevItems => {
@@ -173,20 +180,12 @@ const Index = () => {
   };
 
   const handleCheckout = () => {
-    if (!user) {
-      setAuthOpen(true);
-      return;
-    }
-    
-    toast({
-      title: "Checkout",
-      description: "Checkout functionality will be implemented here.",
-    });
+    navigate('/checkout');
   };
 
   const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  if (loading || !isLoaded) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -195,140 +194,92 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <Header
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        cartItemCount={cartItemsCount}
-        onCartClick={() => setCartOpen(true)}
-      />
+    <div className="min-h-screen bg-background rtl">
+      {/* Top Header */}
+      <div className="bg-primary text-primary-foreground py-2 px-4 text-center text-sm">
+        {siteSettings?.site_name || 'زهرة التوحيد'} - للحصول على أفضل منتج
+      </div>
+      
+      {/* Header with Search */}
+      <div className="bg-background border-b sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <img 
+              src={siteSettings?.site_logo || '/src/assets/logo.png'} 
+              alt="Logo" 
+              className="h-10 w-auto"
+            />
+            
+            <div className="flex-1 max-w-md">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="ابحث عن منتجك المفضلة..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-10"
+                />
+              </div>
+            </div>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCartOpen(true)}
+              className="relative"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full h-5 w-5 text-xs flex items-center justify-center">
+                  {cartItemsCount}
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
 
-      {/* Hero Section */}
-      <Hero />
+      {/* Offers Carousel */}
+      {offers.length > 0 && <OffersCarousel offers={offers} />}
 
-      {/* Featured Products Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Featured Products</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Discover our carefully curated collection of handcrafted items, each piece telling its own unique story.
+      {/* Main Products Section */}
+      <section className="py-8 pb-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">منتجاتنا المميزة</h2>
+            <p className="text-muted-foreground">
+              اكتشف مجموعتنا المتنوعة من المنتجات عالية الجودة
             </p>
           </div>
 
-          {/* Filters */}
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full sm:w-48">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category === 'all' ? 'All Categories' : category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full sm:w-48">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="featured">Featured</SelectItem>
-                      <SelectItem value="newest">Newest</SelectItem>
-                      <SelectItem value="price-low">Price: Low to High</SelectItem>
-                      <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      <SelectItem value="rating">Highest Rated</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="text-sm text-muted-foreground">
-                  Showing {filteredProducts.length} of {products.length} products
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Products Grid */}
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredProducts.map(product => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   onAddToCart={addToCart}
-                  onQuickView={(product) => {
-                    toast({
-                      title: "Quick View",
-                      description: "Product quick view will be implemented here.",
-                    });
-                  }}
+                  onQuickView={() => navigate(`/product/${product.id}`)}
                 />
               ))}
             </div>
           ) : (
             <Card className="p-12 text-center">
-              <h3 className="text-xl font-semibold mb-2">No products found</h3>
+              <h3 className="text-xl font-semibold mb-2">لا توجد منتجات</h3>
               <p className="text-muted-foreground mb-4">
-                Try adjusting your filters or search terms.
+                لم يتم العثور على منتجات تطابق البحث
               </p>
-              <Button onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-                setSortBy('featured');
-              }}>
-                Clear Filters
+              <Button onClick={() => setSearchQuery('')}>
+                مسح البحث
               </Button>
             </Card>
           )}
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-hero">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-primary-foreground mb-4">
-            Stay Updated
-          </h2>
-          <p className="text-xl text-primary-foreground/90 mb-8">
-            Subscribe to our newsletter and be the first to know about new arrivals and exclusive offers.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <Input
-              placeholder="Enter your email"
-              className="bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/60"
-            />
-            <Button variant="hero" className="bg-white/20 hover:bg-white/30">
-              Subscribe
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-card border-t border-border py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent mb-4">
-              VanillaCraft
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Handcrafted with love, delivered with care.
-            </p>
-            <div className="text-sm text-muted-foreground">
-              © 2024 VanillaCraft. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Bottom Navigation */}
+      <BottomNavBar cartItemCount={cartItemsCount} onCartClick={() => setCartOpen(true)} />
 
       {/* Cart Drawer */}
       <CartDrawer
@@ -339,8 +290,6 @@ const Index = () => {
         onRemoveItem={removeFromCart}
         onCheckout={handleCheckout}
       />
-
-      {/* Auth Modal - No longer needed with Clerk */}
     </div>
   );
 };

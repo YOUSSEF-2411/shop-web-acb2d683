@@ -10,6 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Trash2, Edit, Plus, Eye, EyeOff, Settings, Package, FileText, Lock, Store } from 'lucide-react';
 import AdminSettings from '@/components/AdminSettings';
+import OrdersManagement from '@/components/OrdersManagement';
+import OffersManagement from '@/components/OffersManagement';
+import AdvancedSettings from '@/components/AdvancedSettings';
 
 interface Product {
   id: string;
@@ -312,7 +315,7 @@ const AdminPage = () => {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               المنتجات
@@ -321,13 +324,17 @@ const AdminPage = () => {
               <FileText className="h-4 w-4" />
               الطلبات
             </TabsTrigger>
+            <TabsTrigger value="offers" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              العروض
+            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               الإعدادات
             </TabsTrigger>
-            <TabsTrigger value="theme" className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              التصميم
+            <TabsTrigger value="advanced" className="flex items-center gap-2">
+              <Lock className="h-4 w-4" />
+              متقدم
             </TabsTrigger>
           </TabsList>
 
@@ -457,35 +464,19 @@ const AdminPage = () => {
           </TabsContent>
 
           <TabsContent value="orders" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>إدارة الطلبات</CardTitle>
-                <CardDescription>عرض وإدارة طلبات العملاء</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  لا توجد طلبات حالياً
-                </div>
-              </CardContent>
-            </Card>
+            <OrdersManagement />
+          </TabsContent>
+
+          <TabsContent value="offers" className="space-y-6">
+            <OffersManagement />
           </TabsContent>
 
           <TabsContent value="settings">
             <AdminSettings onSettingsUpdate={setSiteSettings} />
           </TabsContent>
 
-          <TabsContent value="theme">
-            <Card>
-              <CardHeader>
-                <CardTitle>معاينة التصميم</CardTitle>
-                <CardDescription>معاينة شكل الموقع بالإعدادات الحالية</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-muted-foreground">
-                  لمعاينة التصميم، قم بتحديث الإعدادات من تبويب "الإعدادات" ثم اذهب إلى الصفحة الرئيسية
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="advanced" className="space-y-6">
+            <AdvancedSettings />
           </TabsContent>
         </Tabs>
       </div>
