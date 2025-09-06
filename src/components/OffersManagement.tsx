@@ -76,8 +76,8 @@ const OffersManagement: React.FC = () => {
         .insert({
           title: newOffer.title,
           description: newOffer.description,
-          image: newOffer.image
-        })
+          image: newOffer.image || null
+        } as any)
         .select()
         .single();
 
@@ -135,7 +135,7 @@ const OffersManagement: React.FC = () => {
       const { error } = await supabase
         .from('offers')
         .delete()
-        .eq('id', offerId);
+        .eq('id', parseInt(offerId));
 
       if (error) throw error;
 

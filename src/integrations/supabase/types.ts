@@ -93,7 +93,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
-          id: number
+          id?: number
           image?: string | null
           title: string
         }

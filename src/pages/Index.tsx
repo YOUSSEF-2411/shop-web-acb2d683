@@ -7,9 +7,11 @@ import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
 import OffersCarousel from '@/components/OffersCarousel';
 import BottomNavBar from '@/components/BottomNavBar';
+import AuthModal from '@/components/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 
 interface Product {
   id: string;
@@ -39,10 +41,12 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [siteSettings, setSiteSettings] = useState<any>(null);
   
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isSignedIn } = useAuth();
 
   // Load data from Supabase
   useEffect(() => {
@@ -180,6 +184,10 @@ const Index = () => {
   };
 
   const handleCheckout = () => {
+    if (!isSignedIn) {
+      setAuthModalOpen(true);
+      return;
+    }
     navigate('/checkout');
   };
 
@@ -195,13 +203,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background rtl">
-      {/* Top Header */}
-      <div className="bg-primary text-primary-foreground py-2 px-4 text-center text-sm">
-        {siteSettings?.site_name || 'زهرة التوحيد'} - للحصول على أفضل منتج
+      {/* Top Header - Only on Desktop */}
+      <div className="hidden md:block bg-primary text-primary-foreground py-2 px-4 text-center text-sm">
+        {siteSettings?.site_name || 'زهرة التوحيد'} - متجر الكتروني متكامل
       </div>
       
-      {/* Header with Search */}
-      <div className="bg-background border-b sticky top-0 z-40">
+      {/* Header with Search - Only on Desktop */}
+      <div className="hidden md:block bg-background border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <img 
@@ -289,6 +297,12 @@ const Index = () => {
         onUpdateQuantity={updateCartQuantity}
         onRemoveItem={removeFromCart}
         onCheckout={handleCheckout}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
       />
     </div>
   );
