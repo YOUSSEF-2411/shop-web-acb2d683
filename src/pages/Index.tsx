@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ShoppingCart, User, Menu, Home, Package, Settings, HeadphonesIcon } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, Home, Package, Settings, HeadphonesIcon, Heart, Grid3X3, Star, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
 import OffersCarousel from '@/components/OffersCarousel';
 import BottomNavBar from '@/components/BottomNavBar';
 import AuthModal from '@/components/AuthModal';
+import Header from '@/components/Header';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -202,91 +204,102 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background rtl">
-      {/* Top Header - Only on Desktop */}
-      <div className="hidden md:block bg-primary text-primary-foreground py-2 px-4 text-center text-sm">
-        {siteSettings?.site_name || 'زهرة التوحيد'} - متجر الكتروني متكامل
-      </div>
-      
-      {/* Header with Search - Only on Desktop */}
-      <div className="hidden md:block bg-background border-b sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <img 
-              src={siteSettings?.site_logo || '/src/assets/logo.png'} 
-              alt="Logo" 
-              className="h-10 w-auto"
+    <div className="min-h-screen bg-gray-50">
+        <Header 
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          cartItemCount={cartItemsCount}
+          onCartClick={() => setCartOpen(true)}
+          siteSettings={siteSettings}
+        />
+
+        {/* Mobile Search Header */}
+        <div className="md:hidden bg-white shadow-sm p-4">
+          <div className="relative">
+            <Input
+              placeholder="ابحث عن منتجك المفضل..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pr-12 h-10 rounded-full border-2 border-green-200"
             />
-            
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="ابحث عن منتجك المفضلة..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-10"
-                />
-              </div>
-            </div>
-            
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCartOpen(true)}
-              className="relative"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {cartItemsCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full h-5 w-5 text-xs flex items-center justify-center">
-                  {cartItemsCount}
-                </span>
-              )}
-            </Button>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           </div>
         </div>
-      </div>
 
       {/* Offers Carousel */}
-      {offers.length > 0 && <OffersCarousel offers={offers} />}
-
-      {/* Main Products Section */}
-      <section className="py-8 pb-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">منتجاتنا المميزة</h2>
-            <p className="text-muted-foreground">
-              اكتشف مجموعتنا المتنوعة من المنتجات عالية الجودة
-            </p>
-          </div>
-
-          {/* Products Grid */}
-          {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map(product => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={addToCart}
-                  onQuickView={() => navigate(`/product/${product.id}`)}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card className="p-12 text-center">
-              <h3 className="text-xl font-semibold mb-2">لا توجد منتجات</h3>
-              <p className="text-muted-foreground mb-4">
-                لم يتم العثور على منتجات تطابق البحث
-              </p>
-              <Button onClick={() => setSearchQuery('')}>
-                مسح البحث
-              </Button>
-            </Card>
-          )}
+      {offers.length > 0 && (
+        <div className="bg-white">
+          <OffersCarousel offers={offers} />
         </div>
-      </section>
+      )}
 
-      {/* Bottom Navigation */}
+      {/* Products Section */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-800">جميع المنتجات</h2>
+          <Button variant="outline" size="sm">
+            عرض الكل
+          </Button>
+        </div>
+
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {filteredProducts.map(product => (
+              <div key={product.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
+                <div className="aspect-square relative overflow-hidden rounded-t-lg">
+                  <img 
+                    src={product.image} 
+                    alt={product.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="absolute top-2 right-2 h-8 w-8 bg-white/80 hover:bg-white"
+                  >
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="p-3">
+                  <h3 className="font-medium text-sm text-gray-900 line-clamp-2 mb-1">{product.title}</h3>
+                  
+                  <div className="flex items-center mb-2">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`w-3 h-3 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-500 mr-1">({product.rating_count})</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-green-600">{product.price} ج.م</span>
+                    <Button 
+                      size="sm" 
+                      className="h-8 bg-green-600 hover:bg-green-700"
+                      onClick={() => addToCart(product)}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Card className="p-12 text-center">
+            <h3 className="text-xl font-semibold mb-2">لا توجد منتجات</h3>
+            <p className="text-muted-foreground mb-4">لم يتم العثور على منتجات تطابق البحث</p>
+            <Button onClick={() => setSearchQuery('')}>مسح البحث</Button>
+          </Card>
+        )}
+      </div>
+
+      {/* Bottom Navigation - Mobile Only */}
       <BottomNavBar cartItemCount={cartItemsCount} onCartClick={() => setCartOpen(true)} />
 
       {/* Cart Drawer */}
