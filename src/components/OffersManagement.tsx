@@ -73,7 +73,11 @@ const OffersManagement: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('offers')
-        .insert([newOffer])
+        .insert({
+          title: newOffer.title,
+          description: newOffer.description,
+          image: newOffer.image
+        })
         .select()
         .single();
 
@@ -135,7 +139,7 @@ const OffersManagement: React.FC = () => {
 
       if (error) throw error;
 
-      setOffers(offers.filter(offer => offer.id !== offerId));
+      setOffers(offers.filter(offer => offer.id.toString() !== offerId));
 
       toast({
         title: "تم الحذف",
@@ -286,7 +290,7 @@ const OffersManagement: React.FC = () => {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => deleteOffer(offer.id)}
+                        onClick={() => deleteOffer(offer.id.toString())}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

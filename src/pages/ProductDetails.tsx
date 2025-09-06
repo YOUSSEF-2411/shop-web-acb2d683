@@ -280,7 +280,7 @@ const ProductDetails: React.FC = () => {
         </Card>
       </div>
 
-      <BottomNavBar />
+      <BottomNavBar cartItemCount={0} onCartClick={() => {}} />
     </div>
   );
 };

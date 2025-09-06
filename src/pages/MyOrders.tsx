@@ -36,8 +36,8 @@ const MyOrders: React.FC = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setOrders(data || []);
+        if (error) throw error;
+        setOrders((data as any) || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast({
@@ -180,7 +180,7 @@ const MyOrders: React.FC = () => {
         )}
       </div>
 
-      <BottomNavBar />
+      <BottomNavBar cartItemCount={0} onCartClick={() => {}} />
     </div>
   );
 };
